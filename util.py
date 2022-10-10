@@ -11,14 +11,6 @@ def tree_stack(trees):
     leaf_stacked = [jnp.stack(leaves) for leaves in zip(*leaf_list)]
     return jax.tree_unflatten(treedef, leaf_stacked)
 
-
-# def zeros_like_output(f, x):
-#     pytree = jax.eval_shape(f, x)
-#     return jax.tree_map(
-#         lambda leaf: jnp.zeros(shape=leaf.shape, dtype=leaf.dtype), pytree
-#     )
-
-
 def batch_split(batch, n_batch: int = None, batch_size: int = None, strict=True):
     n = len(jax.tree_leaves(batch)[0])
 
@@ -124,18 +116,3 @@ def laxmap(f, data, batch_size=None, **kwargs):
         )["save"]
         flat_out = jax.tree_map(lambda x: x.reshape(-1, *x.shape[2:]), batched_out)
         return flat_out
-
-
-# def laxmean(f, data, batch_size=None, unpack=True, **kwargs):
-#     _f = (lambda x: f(*x)) if unpack else f
-#     if batch_size == None:
-#         return fold(lambda _, x: dict(avg=_f(x)), None, data, **kwargs)["avg"]
-#     else:
-
-#         def batched_f(batch):
-#             out_tree = vmap(_f)(batch)
-#             reduced_tree = jax.tree_map(lambda x: x.mean(0), out_tree)
-#             return dict(avg=reduced_tree)
-
-#         batches = batch_split(data, batch_size=batch_size)
-#         return fold(lambda _, batch: batched_f(batch), None, batches, **kwargs)["avg"]
